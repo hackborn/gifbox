@@ -1,0 +1,226 @@
+#include "app.h"
+
+#include <cinder/app/RendererGl.h>
+#include <cinder/gl/gl.h>
+#include <cinder/Filesystem.h>
+#include <kt/app/environment.h>
+#include <kt/app/kt_string.h>
+#include <gifwrap/gif_file.h>
+#include "cinder_gif/path_writer.h"
+#include "cinder_gif/texture_gif_list.h"
+#include "msg/app_msg.h"
+#include "view/status_view.h"
+
+namespace cs {
+
+namespace {
+// True if the path is a GIF.
+bool						is_gif(const ci::fs::path&);
+// True if the path is a non-GIF image (jpg, png).
+bool						is_image(const ci::fs::path&);
+// Get the filename from the path.
+std::string					get_filename(std::string path);
+}
+
+App::App()
+		: mRoot(addOrthoRoot())
+		, mHudView(mRoot.addChildOrThrow<kt::view::View>(new kt::view::View(mCns)))
+		, mGifView(mHudView.addChildOrThrow<GifView>(new GifView(mCns, glm::ivec2(getWindowWidth(), getWindowHeight())))) {
+}
+
+App::~App() {
+	mQuit = true;
+	try {
+		mThread.join();
+	} catch (std::exception const&) {
+	}
+}
+
+void App::prepareSettings(Settings* s) {
+	if (s) {
+		s->setTitle("gifbox");
+		s->setWindowSize(glm::ivec2(1920, 1080));
+//		s->setFullScreen(true);
+//		s->setConsoleWindowEnabled(true);
+	}
+}
+
+void App::setup() {
+	base::setup();
+	// Printing during construction creates an error state, preventing further output,
+	// so clear that out, in case anyone did.
+	std::cout.clear();
+
+	// Build the views
+	const glm::ivec2	iwin_size(getWindowWidth(), getWindowHeight());
+	const glm::vec2		win_size(static_cast<float>(iwin_size.x), static_cast<float>(iwin_size.y));
+	mHudView.setSize(win_size);
+
+	StatusView&			status(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns)));
+	status.setCenter(1.0f, 1.0f);
+	status.setPosition(floorf(win_size.x-10.0f), floorf(win_size.y-10.0f));
+
+	mParams = ci::params::InterfaceGl::create("Params", glm::ivec2(220, 120));
+	mParams->addParam("Frame",	&mFrame, "", true);
+	mParams->addParam<float>("Speed", &mPlaybackSpeed, false).min(0).max(8).step(0.01f).precision(2);
+
+	// Start a thread to handle the actual loading
+	mQuit = false;
+	ci::gl::ContextRef backgroundCtx = ci::gl::Context::create(ci::gl::context());
+	mThread = std::thread( bind( &App::gifThread, this, backgroundCtx));
+
+	// Load the default GIF.
+	auto	input = mThreadInput.make();
+	input->mPaths.push_back(kt::env::expand("$(DATA)/tumblr_n8njbcmeWS1t9jwm6o1_400.gif"));
+	mThreadInput.push(input);
+}
+
+void App::keyDown(ci::app::KeyEvent e) {
+	if( e.getChar() == 'f' ) {
+		// Toggle full screen when the user presses the 'f' key.
+		setFullScreen( ! isFullScreen() );
+	}
+	else if( e.getCode() == ci::app::KeyEvent::KEY_ESCAPE ) {
+		// Exit full screen, or quit the application, when the user presses the ESC key.
+		if( isFullScreen() )
+			setFullScreen( false );
+		else
+			quit();
+	}
+}
+
+void App::fileDrop(ci::app::FileDropEvent e) {
+	try {
+		auto				input(makeInput(e));
+		if (!input) return;
+
+		if (input->mType == InputType::kSave) {
+			input->mSavePath = getSaveFilePath().string();
+			if (input->mSavePath.empty()) return;
+		}
+		mThreadInput.push(input);
+	} catch (std::exception const&) {
+	}
+}
+
+void App::update() {
+	// Get current GIF list
+	auto		list = mThreadOutput.pop();
+	if (list) {
+		mGifView.setTextures(*list);
+	}
+
+	// Update the view
+	mGifView.setPlaybackSpeed(mPlaybackSpeed);
+	base::update();
+
+	// Update params
+	mFrame = static_cast<int32_t>(mGifView.getCurrentFrame());
+	mParams->hide();	// Params don't seem designed for a high update rate, this flushes it.
+	mParams->show();
+
+	// Update status
+	mStatusTransport.pop_all(mStatus);
+	for (const auto& it : mStatus) StatusMsg(it).send(mCns);
+	mStatus.clear();
+}
+
+void App::draw() {
+	base::draw();
+	mParams->draw();
+}
+
+std::shared_ptr<App::Input> App::makeInput(const ci::app::FileDropEvent &e) const {
+	auto				input = mThreadInput.make();
+	if (!input) return nullptr;
+	for (const auto& it : e.getFiles()) {
+		// Only add gifs to load input, images to save input. Take the first of whatever I find
+		if (is_gif(it)) {
+			if (input->mPaths.empty() || input->mType == InputType::kLoad) {
+				input->mType = InputType::kLoad;
+				input->mPaths.push_back(it.string());
+			}
+		} else if (is_image(it)) {
+			if (input->mPaths.empty() || input->mType == InputType::kSave) {
+				input->mType = InputType::kSave;
+				input->mPaths.push_back(it.string());
+			}
+		}
+	}
+	return input;
+}
+
+void App::gifThread(ci::gl::ContextRef context) {
+	ci::ThreadSetup					threadSetup;
+	context->makeCurrent();
+
+	while (!mQuit) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		try {
+			auto					input = mThreadInput.pop();
+			if (input) {
+				if (input->mType == InputType::kLoad) {
+					gifThreadLoad(input->mPaths);
+				} else if (input->mType == InputType::kSave) {
+					gifThreadSave(*input);
+				}
+			}
+		} catch (std::exception const &ex) {
+			std::cout << "Error=" << ex.what() << std::endl;
+		}
+	}
+}
+
+void App::gifThreadLoad(const std::vector<std::string> &input) {
+	auto				output = mThreadOutput.make();
+	for (const auto& it : input) {
+		mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Loading " + get_filename(it)));
+		gif::Reader(it).read(*output);
+		mStatusTransport.push_back(Status(Status::Duration::kEnd, mThreadStatusId, std::string()));
+	}
+	mThreadOutput.push(output);
+}
+
+void App::gifThreadSave(const Input &input) {
+	mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Saving " + get_filename(input.mSavePath)));
+
+	std::string				error;
+	try {
+		PathWriter			file(input.mSavePath);
+		file.setTableMode(gif::TableMode::kGlobalTableFromFirst);
+		gif::Bitmap			bm;
+		for (const auto& it : input.mPaths) {
+			if (!is_image(it)) continue;
+			file.writeFrame(it);
+		}
+	} catch (std::exception const &ex) {
+		error = ex.what();
+	}
+
+	if (!error.empty()) {
+		mStatusTransport.push_back(Status::makeError(error));
+	}
+	mStatusTransport.push_back(Status(Status::Duration::kEnd, mThreadStatusId, std::string()));
+}
+
+namespace {
+
+bool						is_gif(const ci::fs::path &p) {
+	std::string				ext = kt::to_lower(p.extension().string());
+	return ext == ".gif";
+}
+
+bool						is_image(const ci::fs::path &p) {
+	std::string				ext = kt::to_lower(p.extension().string());
+	return ext == ".jpg" || ext == ".jpeg" || ext == ".png";
+}
+
+std::string					get_filename(std::string p) {
+	return ci::fs::path(p).filename().string();
+}
+
+}
+
+} // namespace cs
+
+CINDER_APP(cs::App, ci::app::RendererGl, cs::App::prepareSettings)
