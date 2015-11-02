@@ -25,7 +25,8 @@ std::string					get_filename(std::string path);
 App::App()
 		: mRoot(addOrthoRoot())
 		, mHudView(mRoot.addChildOrThrow<kt::view::View>(new kt::view::View(mCns)))
-		, mGifView(mHudView.addChildOrThrow<GifView>(new GifView(mCns, glm::ivec2(getWindowWidth(), getWindowHeight())))) {
+		, mMediaView(mHudView.addChildOrThrow<MediaView>(new MediaView(mCns)))
+		, mGifView(mMediaView.setMediaViewOrThrow<GifView>(new GifView(mCns))) {
 }
 
 App::~App() {
@@ -55,6 +56,7 @@ void App::setup() {
 	const glm::ivec2	iwin_size(getWindowWidth(), getWindowHeight());
 	const glm::vec2		win_size(static_cast<float>(iwin_size.x), static_cast<float>(iwin_size.y));
 	mHudView.setSize(win_size);
+	mMediaView.setSize(win_size);
 
 	StatusView&			status(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns)));
 	status.setCenter(1.0f, 1.0f);
@@ -63,6 +65,7 @@ void App::setup() {
 	mParams = ci::params::InterfaceGl::create("Params", glm::ivec2(220, 120));
 	mParams->addParam("Frame",	&mFrame, "", true);
 	mParams->addParam<float>("Speed", &mPlaybackSpeed, false).min(0).max(8).step(0.01f).precision(2);
+	mParams->addParam<float>("Size", &mGifSize, false).min(0).max(1).step(0.01f).precision(2);
 
 	// Start a thread to handle the actual loading
 	mQuit = false;
@@ -112,6 +115,7 @@ void App::update() {
 
 	// Update the view
 	mGifView.setPlaybackSpeed(mPlaybackSpeed);
+	mMediaView.setMediaSize(mGifSize);
 	base::update();
 
 	// Update params

@@ -12,6 +12,7 @@
 #include "thread/safe_value.h"
 #include "thread/safe_vector.h"
 #include "view/gif_view.h"
+#include "view/media_view.h"
 
 namespace cs {
 
@@ -52,12 +53,14 @@ private:
 	// Drawing
 	kt::view::OrthoRoot&		mRoot;
 	kt::view::View&				mHudView;
+	cs::MediaView&				mMediaView;
 	cs::GifView&				mGifView;
 
 	// Params
 	ci::params::InterfaceGlRef	mParams;
 	int32_t						mFrame = 0;
 	float						mPlaybackSpeed = 1.0f;
+	float						mGifSize = 0.0f;
 
 	// Gif loading
 	std::thread					mThread;

@@ -9,6 +9,9 @@
 #include <kt/app/update_defs.h>
 #include <kt/dbg/dbg_defs.h>
 #include <kt/view/view_defs.h>
+// I separated the msg stuff specifically so I could swap it out,
+// but it's so useful it's making its way back in.
+#include <kt/service/msg_service.h>
 
 namespace kt {
 class Cns;
@@ -57,6 +60,11 @@ public:
 	Iter						end() { return mChildren.end(); }
 	CIter						begin() const { return mChildren.begin(); }
 	CIter						end() const { return mChildren.end(); }
+
+	// Generic message handling
+	virtual void				onMsg(const kt::Msg&) { }
+	// Send a message up the hierarchy
+	void						parentMsg(const kt::Msg&);
 
 	// FLAGS
 	// When true this view will not draw.

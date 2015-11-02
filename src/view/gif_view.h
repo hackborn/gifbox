@@ -16,10 +16,11 @@ class GifView : public kt::view::View {
 public:
 	GifView() = delete;
 	GifView(const GifView&) = delete;
-	GifView(kt::Cns&, const glm::ivec2 &window_size);
+	GifView(kt::Cns&);
 
 	void					setTextures(const TextureGifList&);
 	size_t					getCurrentFrame() const { return mTextureIndex; }
+	// Controlled by the application -- set the current relative playback speed.
 	void					setPlaybackSpeed(const float = 1.0f);
 
 protected:
@@ -30,6 +31,7 @@ private:
 	void					restartTimer();
 	// Answer the frame rate of the current frame, or the default.
 	double					findFrameRate() const;
+	ci::gl::VboMeshRef		meshFor(const float width, const float h) const;
 
 	using base = kt::view::View;
 	TextureGifList			mTextures;

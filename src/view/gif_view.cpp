@@ -3,6 +3,7 @@
 #include <cinder/gl/draw.h>
 #include <cinder/gl/gl.h>
 #include <cinder/gl/scoped.h>
+#include "msg/view_msg.h"
 
 namespace cs {
 
@@ -14,16 +15,10 @@ const double				DEFAULT_FPS = (7.0/60.0);
 /**
  * @class cs::GifView
  */
-GifView::GifView(kt::Cns &cns, const glm::ivec2 &window_size)
+GifView::GifView(kt::Cns &cns)
 		: base(cns) {
 	// Create the mesh
-	const glm::vec2			tc_ul(0.0f, 0.0f),
-							tc_ur(1.0f, 0.0f),
-							tc_lr(1.0f, 1.0f),
-							tc_ll(0.0f, 1.0f);
-	const float				fw = static_cast<float>(window_size.x),
-							fh = static_cast<float>(window_size.y);
-	ci::gl::VboMeshRef		mesh = ci::gl::VboMesh::create(ci::geom::Rect(ci::Rectf(0, 0, fw, fh)).texCoords(tc_ul, tc_ur, tc_lr, tc_ll));
+	ci::gl::VboMeshRef		mesh = meshFor(1.0f, 1.0f);
 	if (!mesh) throw std::runtime_error("Background vbo can't create vbo mesh");
 
 	// Create shader
@@ -40,6 +35,15 @@ void GifView::setTextures(const TextureGifList &t) {
 	mTextureIndex = 0;
 	mNextTime = findFrameRate();
 	mTimer.start();
+
+	// Update size
+	auto*			frame = mTextures.getFrame(0);
+	if (frame && frame->mBitmap) {
+		const glm::vec2		new_size(frame->mBitmap->getWidth(), frame->mBitmap->getHeight());
+		mBatch->replaceVboMesh(meshFor(new_size.x, new_size.y));
+		setSize(new_size);
+		parentMsg(cs::MediaChangedMsg());
+	}
 }
 
 void GifView::setPlaybackSpeed(const float s) {
@@ -88,6 +92,16 @@ double GifView::findFrameRate() const {
 	auto*			frame = mTextures.getFrame(mTextureIndex);
 	if (frame && frame->mDelay > 0.00000001) return frame->mDelay;
 	return DEFAULT_FPS;
+}
+
+ci::gl::VboMeshRef GifView::meshFor(const float w, const float h) const {
+	const glm::vec2			tc_ul(0.0f, 0.0f),
+							tc_ur(1.0f, 0.0f),
+							tc_lr(1.0f, 1.0f),
+							tc_ll(0.0f, 1.0f);
+	ci::gl::VboMeshRef		mesh = ci::gl::VboMesh::create(ci::geom::Rect(ci::Rectf(0, 0, w, h)).texCoords(tc_ul, tc_ur, tc_lr, tc_ll));
+	if (!mesh) throw std::runtime_error("GifView can't create vbo mesh");
+	return mesh;
 }
 
 } // namespace cs

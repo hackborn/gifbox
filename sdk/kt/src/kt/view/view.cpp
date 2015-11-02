@@ -95,6 +95,14 @@ ViewRef View::findChild(const std::function<bool(const View&)> &fn) const {
 	return ViewRef();
 }
 
+void View::parentMsg(const kt::Msg &m) {
+	View*		v = mParent;
+	while (v) {
+		v->onMsg(m);
+		v = v->mParent;
+	}
+}
+
 void View::setHidden(const bool v) {
 	const std::uint32_t		old_flags(mFlags);
 	setFlag(HIDDEN_F, v);
@@ -257,6 +265,7 @@ void View::onSetSize(const glm::vec3 &v) {
 void View::onSetScale(const glm::vec3 &v) {
 	if (mScale == v) return;
 	mScale = v;
+	mTransformDirty = true;
 //	if (mHooks) mHooks->onSizeChanged(mSize);
 	onScaleChanged(v);
 }

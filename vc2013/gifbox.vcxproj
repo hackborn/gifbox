@@ -286,6 +286,7 @@ xcopy /y "..\..\..\lib\msw\x86\d3dcompiler_46.dll" "$(OutDir)"</Command>
     <ClCompile Include="..\src\cinder_gif\path_writer.cpp" />
     <ClCompile Include="..\src\cinder_gif\texture_gif_list.cpp" />
     <ClCompile Include="..\src\view\gif_view.cpp" />
+    <ClCompile Include="..\src\view\media_view.cpp" />
     <ClCompile Include="..\src\view\status_view.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -295,9 +296,11 @@ xcopy /y "..\..\..\lib\msw\x86\d3dcompiler_46.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\cinder_gif\path_writer.h" />
     <ClInclude Include="..\src\cinder_gif\texture_gif_list.h" />
     <ClInclude Include="..\src\msg\app_msg.h" />
+    <ClInclude Include="..\src\msg\view_msg.h" />
     <ClInclude Include="..\src\thread\safe_value.h" />
     <ClInclude Include="..\src\thread\safe_vector.h" />
     <ClInclude Include="..\src\view\gif_view.h" />
+    <ClInclude Include="..\src\view\media_view.h" />
     <ClInclude Include="..\src\view\status_view.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

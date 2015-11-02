@@ -60,6 +60,12 @@
     <ClInclude Include="..\src\app\app.h">
       <Filter>Source Files\app</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\view\media_view.h">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\msg\view_msg.h">
+      <Filter>Source Files\msg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
@@ -86,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="..\src\app\app.cpp">
       <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\view\media_view.cpp">
+      <Filter>Source Files\view</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
