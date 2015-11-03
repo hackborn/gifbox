@@ -1,7 +1,7 @@
 #ifndef APP_VIEW_FILENAVIGATIONVIEW_H_
 #define APP_VIEW_FILENAVIGATIONVIEW_H_
 
-#include <kt/view/view.h>
+#include <kt/view/button_view.h>
 #include "app/file_navigation.h"
 
 namespace cs {
@@ -18,17 +18,11 @@ public:
 
 	void						setNavigation(FileNavigationRef);
 
-	void						pointerDown(const kt::Pointer&) override;
-	void						pointerUp(const kt::Pointer&) override;
-
-protected:
-//	void						onUpdate(const kt::UpdateParams&) override;
-	void						onDraw(const kt::view::DrawParams&) override;
-
 private:
 	using base = kt::view::View;
-//	kt::msg::Client				mMsgClient;
 	FileNavigationRef			mNavigation;
+	kt::view::Button&			mPrevious;
+	kt::view::Button&			mNext;
 };
 
 } // namespace cs

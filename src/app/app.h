@@ -44,6 +44,7 @@ private:
 		InputType				mType = InputType::kLoad;
 		StringVec				mPaths;
 		std::string				mSavePath;
+		bool					mReplaceNavigation = false;
 	};
 
 	struct Output {
@@ -51,6 +52,7 @@ private:
 		TextureGifList			mGifList;
 		// The path(s) that were the input to this operation
 		StringVec				mPaths;
+		bool					mReplaceNavigation = false;
 	};
 
 	void						onSetMediaPath(const SetMediaPathMsg&);
@@ -58,8 +60,8 @@ private:
 	std::shared_ptr<Input>		makeInput(const ci::app::FileDropEvent&) const;
 	// Separate thread where all the file loading and saving occurs.
 	void						gifThread(ci::gl::ContextRef);
-	void						gifThreadLoad(const StringVec&);
-	void						gifThreadSave(const Input&);
+	void						gifThreadLoad(const StringVec&, const bool replace_navigation);
+	void						gifThreadSave(const Input&, const bool replace_navigation);
 
 
 	kt::msg::Client				mMsgClient;

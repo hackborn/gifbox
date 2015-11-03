@@ -126,6 +126,12 @@
     <ClInclude Include="..\src\kt\time\seconds.h">
       <Filter>Source Files\time</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\kt\view\visual.h">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\kt\view\button_view.h">
+      <Filter>Source Files\view</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\kt\app\cns.cpp">
@@ -190,6 +196,9 @@
     </ClCompile>
     <ClCompile Include="..\src\kt\time\seconds.cpp">
       <Filter>Source Files\time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\kt\view\button_view.cpp">
+      <Filter>Source Files\view</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

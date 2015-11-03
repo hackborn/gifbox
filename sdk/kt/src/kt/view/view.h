@@ -65,6 +65,8 @@ public:
 	virtual void				onMsg(const kt::Msg&) { }
 	// Send a message up the hierarchy
 	void						parentMsg(const kt::Msg&);
+	// Abstract interface for changing state.
+	virtual void				setVisualState(const std::string&) { }
 
 	// FLAGS
 	// When true this view will not draw.

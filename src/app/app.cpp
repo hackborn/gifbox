@@ -62,7 +62,6 @@ void App::setup() {
 	mMediaView.setSize(win_size);
 	mFileNavigationView.setCenter(0.0f, 1.0f);
 	mFileNavigationView.setPosition(10.0f, floorf(win_size.y-10.0f));
-	mFileNavigationView.setSize(100.0f, 80.0);
 
 	StatusView&			status(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns)));
 	status.setCenter(1.0f, 1.0f);
@@ -81,6 +80,7 @@ void App::setup() {
 	// Load the default GIF.
 	auto	input = mThreadInput.make();
 	input->mPaths.push_back(kt::env::expand("$(DATA)/tumblr_n8njbcmeWS1t9jwm6o1_400.gif"));
+	input->mReplaceNavigation = true;
 	mThreadInput.push(input);
 }
 
@@ -107,6 +107,7 @@ void App::fileDrop(ci::app::FileDropEvent e) {
 			input->mSavePath = getSaveFilePath().string();
 			if (input->mSavePath.empty()) return;
 		}
+		input->mReplaceNavigation = true;
 		mThreadInput.push(input);
 	} catch (std::exception const&) {
 	}
@@ -117,10 +118,12 @@ void App::update() {
 	auto		list = mThreadOutput.pop();
 	if (list) {
 		mGifView.setTextures(list->mGifList);
-		if (list->mPaths.size() == 1) {
-			mFileNavigationView.setNavigation(std::make_shared<DirectoryNavigation>(list->mPaths.front()));
-		} else {
-			mFileNavigationView.setNavigation(std::make_shared<FileListNavigation>(list->mPaths));
+		if (list->mReplaceNavigation) {
+			if (list->mPaths.size() == 1) {
+				mFileNavigationView.setNavigation(std::make_shared<DirectoryNavigation>(list->mPaths.front()));
+			} else {
+				mFileNavigationView.setNavigation(std::make_shared<FileListNavigation>(list->mPaths));
+			}
 		}
 	}
 
@@ -183,9 +186,9 @@ void App::gifThread(ci::gl::ContextRef context) {
 			auto					input = mThreadInput.pop();
 			if (input) {
 				if (input->mType == InputType::kLoad) {
-					gifThreadLoad(input->mPaths);
+					gifThreadLoad(input->mPaths, input->mReplaceNavigation);
 				} else if (input->mType == InputType::kSave) {
-					gifThreadSave(*input);
+					gifThreadSave(*input, input->mReplaceNavigation);
 				}
 			}
 		} catch (std::exception const &ex) {
@@ -194,13 +197,14 @@ void App::gifThread(ci::gl::ContextRef context) {
 	}
 }
 
-void App::gifThreadLoad(const StringVec &input) {
+void App::gifThreadLoad(const StringVec &input, const bool replace_navigation) {
 	auto				output = mThreadOutput.make();
 	if (!output) return;
 
 	// When we have a collection of paths as input, load the first
 	// and let the user navigate through the others.
 	output->mPaths = input;
+	output->mReplaceNavigation = replace_navigation;
 	if (!input.empty()) {
 		auto			fn = input.front();
 		mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Loading " + get_filename(fn)));
@@ -210,7 +214,7 @@ void App::gifThreadLoad(const StringVec &input) {
 	mThreadOutput.push(output);
 }
 
-void App::gifThreadSave(const Input &input) {
+void App::gifThreadSave(const Input &input, const bool replace_navigation) {
 	mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Saving " + get_filename(input.mSavePath)));
 
 	std::string				error;

@@ -276,12 +276,14 @@
     <ClInclude Include="..\src\kt\service\msg_service.h" />
     <ClInclude Include="..\src\kt\service\update_service.h" />
     <ClInclude Include="..\src\kt\time\seconds.h" />
+    <ClInclude Include="..\src\kt\view\button_view.h" />
     <ClInclude Include="..\src\kt\view\image_view.h" />
     <ClInclude Include="..\src\kt\view\label_view.h" />
     <ClInclude Include="..\src\kt\view\view.h" />
     <ClInclude Include="..\src\kt\view\view_curtain.h" />
     <ClInclude Include="..\src\kt\view\view_defs.h" />
     <ClInclude Include="..\src\kt\view\view_root.h" />
+    <ClInclude Include="..\src\kt\view\visual.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\kt\app\app.cpp" />
@@ -301,6 +303,7 @@
     <ClCompile Include="..\src\kt\service\msg_service.cpp" />
     <ClCompile Include="..\src\kt\service\update_service.cpp" />
     <ClCompile Include="..\src\kt\time\seconds.cpp" />
+    <ClCompile Include="..\src\kt\view\button_view.cpp" />
     <ClCompile Include="..\src\kt\view\image_view.cpp" />
     <ClCompile Include="..\src\kt\view\label_view.cpp" />
     <ClCompile Include="..\src\kt\view\view.cpp" />

@@ -7,7 +7,7 @@ namespace kt {
 namespace view {
 
 /**
- * \class kt::view::Label
+ * @class kt::view::Label
  */
 Label::Label(kt::Cns &cns)
 		: base(cns)
