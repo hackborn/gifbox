@@ -23,10 +23,13 @@ std::string					get_filename(std::string path);
 }
 
 App::App()
-		: mRoot(addOrthoRoot())
+		: mMsgClient(mCns)
+		, mRoot(addOrthoRoot())
 		, mHudView(mRoot.addChildOrThrow<kt::view::View>(new kt::view::View(mCns)))
 		, mMediaView(mHudView.addChildOrThrow<MediaView>(new MediaView(mCns)))
-		, mGifView(mMediaView.setMediaViewOrThrow<GifView>(new GifView(mCns))) {
+		, mGifView(mMediaView.setMediaViewOrThrow<GifView>(new GifView(mCns)))
+		, mFileNavigationView(mHudView.addChildOrThrow<FileNavigationView>(new FileNavigationView(mCns))) {
+	mMsgClient.add<SetMediaPathMsg>([this](const SetMediaPathMsg &m) {onSetMediaPath(m);});
 }
 
 App::~App() {
@@ -57,6 +60,9 @@ void App::setup() {
 	const glm::vec2		win_size(static_cast<float>(iwin_size.x), static_cast<float>(iwin_size.y));
 	mHudView.setSize(win_size);
 	mMediaView.setSize(win_size);
+	mFileNavigationView.setCenter(0.0f, 1.0f);
+	mFileNavigationView.setPosition(10.0f, floorf(win_size.y-10.0f));
+	mFileNavigationView.setSize(100.0f, 80.0);
 
 	StatusView&			status(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns)));
 	status.setCenter(1.0f, 1.0f);
@@ -110,7 +116,12 @@ void App::update() {
 	// Get current GIF list
 	auto		list = mThreadOutput.pop();
 	if (list) {
-		mGifView.setTextures(*list);
+		mGifView.setTextures(list->mGifList);
+		if (list->mPaths.size() == 1) {
+			mFileNavigationView.setNavigation(std::make_shared<DirectoryNavigation>(list->mPaths.front()));
+		} else {
+			mFileNavigationView.setNavigation(std::make_shared<FileListNavigation>(list->mPaths));
+		}
 	}
 
 	// Update the view
@@ -132,6 +143,14 @@ void App::update() {
 void App::draw() {
 	base::draw();
 	mParams->draw();
+}
+
+void App::onSetMediaPath(const SetMediaPathMsg &m) {
+	if (!m.mPath.empty()) {
+		auto	input = mThreadInput.make();
+		input->mPaths.push_back(m.mPath);
+		mThreadInput.push(input);
+	}
 }
 
 std::shared_ptr<App::Input> App::makeInput(const ci::app::FileDropEvent &e) const {
@@ -175,11 +194,17 @@ void App::gifThread(ci::gl::ContextRef context) {
 	}
 }
 
-void App::gifThreadLoad(const std::vector<std::string> &input) {
+void App::gifThreadLoad(const StringVec &input) {
 	auto				output = mThreadOutput.make();
-	for (const auto& it : input) {
-		mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Loading " + get_filename(it)));
-		gif::Reader(it).read(*output);
+	if (!output) return;
+
+	// When we have a collection of paths as input, load the first
+	// and let the user navigate through the others.
+	output->mPaths = input;
+	if (!input.empty()) {
+		auto			fn = input.front();
+		mStatusTransport.push_back(Status(Status::Duration::kStart, ++mThreadStatusId, "Loading " + get_filename(fn)));
+		gif::Reader(fn).read(output->mGifList);
 		mStatusTransport.push_back(Status(Status::Duration::kEnd, mThreadStatusId, std::string()));
 	}
 	mThreadOutput.push(output);
@@ -196,6 +221,8 @@ void App::gifThreadSave(const Input &input) {
 		for (const auto& it : input.mPaths) {
 			if (!is_image(it)) continue;
 			file.writeFrame(it);
+
+			if (mQuit) break;
 		}
 	} catch (std::exception const &ex) {
 		error = ex.what();

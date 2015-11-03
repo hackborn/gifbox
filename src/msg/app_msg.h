@@ -16,6 +16,17 @@ public:
 	const Status&			mStatus;
 };
 
+/**
+ * @class cs::SetMediaPathMsg
+ * @brief Command to set the current media path.
+ * @description This is temporary, until navigation is worked out.
+ */
+class SetMediaPathMsg : public kt::msg::RegisteredMsg<SetMediaPathMsg> {
+public:
+	SetMediaPathMsg(const std::string &s) : mPath(s) { }
+	const std::string&		mPath;
+};
+
 } // namespace cs
 
 #endif

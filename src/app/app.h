@@ -9,8 +9,10 @@
 #include <cinder/Thread.h>
 #include <kt/app/app.h>
 #include "app/status.h"
+#include "msg/app_msg.h"
 #include "thread/safe_value.h"
 #include "thread/safe_vector.h"
+#include "view/file_navigation_view.h"
 #include "view/gif_view.h"
 #include "view/media_view.h"
 
@@ -44,17 +46,30 @@ private:
 		std::string				mSavePath;
 	};
 
+	struct Output {
+		// Representing a single GIF
+		TextureGifList			mGifList;
+		// The path(s) that were the input to this operation
+		StringVec				mPaths;
+	};
+
+	void						onSetMediaPath(const SetMediaPathMsg&);
+
 	std::shared_ptr<Input>		makeInput(const ci::app::FileDropEvent&) const;
 	// Separate thread where all the file loading and saving occurs.
 	void						gifThread(ci::gl::ContextRef);
-	void						gifThreadLoad(const std::vector<std::string>&);
+	void						gifThreadLoad(const StringVec&);
 	void						gifThreadSave(const Input&);
+
+
+	kt::msg::Client				mMsgClient;
 
 	// Drawing
 	kt::view::OrthoRoot&		mRoot;
 	kt::view::View&				mHudView;
 	cs::MediaView&				mMediaView;
 	cs::GifView&				mGifView;
+	class FileNavigationView&	mFileNavigationView;
 
 	// Params
 	ci::params::InterfaceGlRef	mParams;
@@ -66,7 +81,7 @@ private:
 	std::thread					mThread;
 	std::atomic_bool			mQuit;
 	SafeValue<Input>			mThreadInput;
-	SafeValue<TextureGifList>	mThreadOutput;
+	SafeValue<Output>			mThreadOutput;
 	uint32_t					mThreadStatusId = 0;
 
 	// Status

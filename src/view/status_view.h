@@ -21,7 +21,6 @@ public:
 
 protected:
 	void						onUpdate(const kt::UpdateParams&) override;
-//	void						onDraw(const kt::view::DrawParams&) override;
 
 private:
 	void						onStatusMsg(const StatusMsg&);

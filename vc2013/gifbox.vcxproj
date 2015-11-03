@@ -283,8 +283,10 @@ xcopy /y "..\..\..\lib\msw\x86\d3dcompiler_46.dll" "$(OutDir)"</Command>
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\src\app\app.cpp" />
+    <ClCompile Include="..\src\app\file_navigation.cpp" />
     <ClCompile Include="..\src\cinder_gif\path_writer.cpp" />
     <ClCompile Include="..\src\cinder_gif\texture_gif_list.cpp" />
+    <ClCompile Include="..\src\view\file_navigation_view.cpp" />
     <ClCompile Include="..\src\view\gif_view.cpp" />
     <ClCompile Include="..\src\view\media_view.cpp" />
     <ClCompile Include="..\src\view\status_view.cpp" />
@@ -292,6 +294,7 @@ xcopy /y "..\..\..\lib\msw\x86\d3dcompiler_46.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\src\app\app.h" />
+    <ClInclude Include="..\src\app\file_navigation.h" />
     <ClInclude Include="..\src\app\status.h" />
     <ClInclude Include="..\src\cinder_gif\path_writer.h" />
     <ClInclude Include="..\src\cinder_gif\texture_gif_list.h" />
@@ -299,6 +302,7 @@ xcopy /y "..\..\..\lib\msw\x86\d3dcompiler_46.dll" "$(OutDir)"</Command>
     <ClInclude Include="..\src\msg\view_msg.h" />
     <ClInclude Include="..\src\thread\safe_value.h" />
     <ClInclude Include="..\src\thread\safe_vector.h" />
+    <ClInclude Include="..\src\view\file_navigation_view.h" />
     <ClInclude Include="..\src\view\gif_view.h" />
     <ClInclude Include="..\src\view\media_view.h" />
     <ClInclude Include="..\src\view\status_view.h" />
