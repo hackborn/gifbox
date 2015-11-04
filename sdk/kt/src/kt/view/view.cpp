@@ -9,6 +9,14 @@ namespace view {
 const std::uint32_t			HIT_POINTER_EVENTS(1<<0);
 const std::uint32_t			HIT_DRAG_EVENTS(1<<1);
 
+// From view_defs.h
+namespace {
+const std::string&			_REST_STATE("ktr");
+const std::string&			_DOWN_STATE("ktd");
+}
+extern const std::string&	REST_STATE(_REST_STATE);
+extern const std::string&	DOWN_STATE(_DOWN_STATE);
+
 namespace {
 // XXX Should be in a math class, and should be constexpr which -- WTF??
 // -- it doesn't look like is supported even in VS2015.
@@ -214,15 +222,20 @@ bool View::contains(const glm::vec3 &point) const {
 }
 
 void View::pointerDown(const Pointer &p) {
-//	if (mPointerHandler) mPointerHandler->pointerDown(p);
+	if (mBehavior) mBehavior->pointerDown(p);
 }
 
 void View::pointerMoved(const Pointer &p, const std::uint32_t flags) {
-//	if (mPointerHandler) mPointerHandler->pointerMoved(p, flags);
+	if (mBehavior) mBehavior->pointerMoved(p, flags);
 }
 
 void View::pointerUp(const Pointer &p) {
-//	if (mPointerHandler) mPointerHandler->pointerUp(p);
+	if (mBehavior) mBehavior->pointerUp(p);
+}
+
+void View::setBehavior(BehaviorRef b) {
+	mBehavior = b;
+	setPointerEvents(true);
 }
 
 glm::vec3 View::globalFromLocal(const glm::vec3 &local_pt) const {

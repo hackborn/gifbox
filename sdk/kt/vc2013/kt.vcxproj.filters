@@ -31,6 +31,9 @@
     <Filter Include="Source Files\time">
       <UniqueIdentifier>{ad75a80b-86e7-4db6-b2cd-d4814c902d81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\behavior">
+      <UniqueIdentifier>{c5b1315a-205a-45e1-80ec-971e2d4a33e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Resources.h">
@@ -132,6 +135,12 @@
     <ClInclude Include="..\src\kt\view\button_view.h">
       <Filter>Source Files\view</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\kt\behavior\behavior.h">
+      <Filter>Source Files\behavior</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\kt\behavior\button_behavior.h">
+      <Filter>Source Files\behavior</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\kt\app\cns.cpp">
@@ -199,6 +208,9 @@
     </ClCompile>
     <ClCompile Include="..\src\kt\view\button_view.cpp">
       <Filter>Source Files\view</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\kt\behavior\button_behavior.cpp">
+      <Filter>Source Files\behavior</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

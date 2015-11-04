@@ -266,6 +266,8 @@
     <ClInclude Include="..\src\kt\app\settings.h" />
     <ClInclude Include="..\src\kt\app\update.h" />
     <ClInclude Include="..\src\kt\app\update_defs.h" />
+    <ClInclude Include="..\src\kt\behavior\behavior.h" />
+    <ClInclude Include="..\src\kt\behavior\button_behavior.h" />
     <ClInclude Include="..\src\kt\dbg\dbg_defs.h" />
     <ClInclude Include="..\src\kt\math\circle.h" />
     <ClInclude Include="..\src\kt\math\geometry.h" />
@@ -294,6 +296,7 @@
     <ClCompile Include="..\src\kt\app\mouse_handler.cpp" />
     <ClCompile Include="..\src\kt\app\settings.cpp" />
     <ClCompile Include="..\src\kt\app\update.cpp" />
+    <ClCompile Include="..\src\kt\behavior\button_behavior.cpp" />
     <ClCompile Include="..\src\kt\math\geometry.cpp" />
     <ClCompile Include="..\src\kt\math\range.cpp" />
     <ClCompile Include="..\src\kt\math\segment.cpp" />

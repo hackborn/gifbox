@@ -26,10 +26,7 @@ public:
 
 	void						setVisual(const VisualRef&);
 	void						setVisualState(const std::string&) override;
-	void						setClickFn(std::function<void(void)>);
-
-	// XXX Temp until I have behaviours
-	void						pointerUp(const kt::Pointer&) override;
+	void						setClickFn(std::function<void(void)> fn) { mClickFn = fn; }
 
 protected:
 	void						onDraw(const kt::view::DrawParams&) override;
@@ -40,7 +37,7 @@ private:
 	using base = kt::view::View;
 	VisualRef					mVisual;
 	std::string					mLastVisualState;
-	std::function<void(void)>	mOnClickFn;
+	std::function<void(void)>	mClickFn;
 };
 
 } // namespace view

@@ -53,42 +53,52 @@ namespace {
 // XXX Temp classes
 class PrevVis : public kt::view::Visual {
 public:
-	PrevVis() { }
+	PrevVis() {  mC = mRestC; }
 
 	void				setSize(const glm::vec3 &size) override {
 		mSize = size;
 	}
 
-	void				setState(const std::string&) override {
+	void				setState(const std::string &s) override {
+		if (s == kt::view::DOWN_STATE) mC = mDownC;
+		else mC = mRestC;
 	}
 
 	void				onDraw(const kt::view::DrawParams&) override {
-		ci::gl::color(0.0f, 1.0f, 0.0f, 1.0f);
+		ci::gl::color(mC);
 		ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, mSize.x, mSize.y));	
 	}
 
 private:
 	glm::vec3			mSize;
+	ci::ColorA			mRestC = ci::ColorA(0.6f, 0.9f, 0.6f, 1.0f),
+						mDownC = ci::ColorA(0.0f, 0.5f, 0.0f, 1.0f);
+	ci::ColorA			mC;
 };
 
 class NextVis : public kt::view::Visual {
 public:
-	NextVis() { }
+	NextVis() { mC = mRestC; }
 
 	void				setSize(const glm::vec3 &size) override {
 		mSize = size;
 	}
 
-	void				setState(const std::string&) override {
+	void				setState(const std::string &s) override {
+		if (s == kt::view::DOWN_STATE) mC = mDownC;
+		else mC = mRestC;
 	}
 
 	void				onDraw(const kt::view::DrawParams&) override {
-		ci::gl::color(1.0f, 0.0f, 0.0f, 1.0f);
+		ci::gl::color(mC);
 		ci::gl::drawSolidRect(ci::Rectf(0.0f, 0.0f, mSize.x, mSize.y));	
 	}
 
 private:
 	glm::vec3			mSize;
+	ci::ColorA			mRestC = ci::ColorA(0.9f, 0.6f, 0.6f, 1.0f),
+						mDownC = ci::ColorA(0.5f, 0.0f, 0.0f, 1.0f);
+	ci::ColorA			mC;
 };
 
 kt::view::VisualRef		previous_visual(const kt::Cns&) {

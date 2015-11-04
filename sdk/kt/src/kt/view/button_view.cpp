@@ -1,6 +1,7 @@
 #include "button_view.h"
 
 #include <kt/app/cns.h>
+#include <kt/behavior/button_behavior.h>
 
 namespace kt {
 namespace view {
@@ -10,7 +11,12 @@ namespace view {
  */
 Button::Button(kt::Cns &cns)
 		: base(cns) {
-	setPointerEvents(true);
+	ButtonBehaviorRef		b = std::make_shared<ButtonBehavior>();
+	if (b) {
+		b->setVisualStateFn([this](const std::string &s) {setVisualState(s);});
+		b->setClickFn([this](){ if (mClickFn) mClickFn(); });
+		setBehavior(b);
+	}
 }
 
 void Button::setVisual(const VisualRef &v) {
@@ -26,14 +32,6 @@ void Button::setVisualState(const std::string &s) {
 
 	mLastVisualState = s;
 	if (mVisual) mVisual->setState(s);
-}
-
-void Button::setClickFn(std::function<void(void)> fn) {
-	mOnClickFn = fn;
-}
-
-void Button::pointerUp(const kt::Pointer&) {
-	if (mOnClickFn) mOnClickFn();
 }
 
 void Button::onDraw(const kt::view::DrawParams &p) {

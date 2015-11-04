@@ -8,6 +8,14 @@ namespace view {
 class RootCfg;
 using RootCfgRef = std::shared_ptr<RootCfg>;
 
+// Standard visual states. The actual strings for all application states will
+// be prefixed with "kt".
+// Note: defined in view.cpp
+	// Default at-rest state.
+extern const std::string&	REST_STATE;
+	// View is being pressed down.
+extern const std::string&	DOWN_STATE;
+
 /**
  * @class kt::view::DrawParams
  */

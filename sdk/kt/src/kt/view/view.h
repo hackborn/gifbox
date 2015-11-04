@@ -7,6 +7,7 @@
 #include <cinder/Matrix44.h>
 #include <kt/app/pointer.h>
 #include <kt/app/update_defs.h>
+#include <kt/behavior/behavior.h>
 #include <kt/dbg/dbg_defs.h>
 #include <kt/view/view_defs.h>
 // I separated the msg stuff specifically so I could swap it out,
@@ -114,6 +115,10 @@ public:
 	virtual void				pointerMoved(const Pointer&, const std::uint32_t flags = 0);
 	virtual void				pointerUp(const Pointer&);
 
+	// Class that will take over handling of the pointer events.
+	// Automatically enables pointer events.
+	void						setBehavior(BehaviorRef);
+
 	// Translations
 	// XXX These should probably be placed in a separate util that caches the result
 	// of building the matrix.
@@ -166,6 +171,7 @@ private:
 
 	std::uint32_t				mFlags = 0;
 	std::uint32_t				mHitFlags = 0;
+	BehaviorRef					mBehavior;
 	// Cached
 	mutable bool				mTransformDirty = true;
 	mutable glm::mat4			mTransform;
