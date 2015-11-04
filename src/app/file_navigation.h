@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <time.h>
+#include <cinder/Filesystem.h>
 
 namespace cs {
 class FileNavigation;
@@ -17,11 +19,11 @@ class FileNavigation {
 public:
 	FileNavigation() { }
 
-	virtual bool			hasPrevious() const = 0;
-	virtual bool			hasNext() const = 0;
+	virtual bool				hasPrevious() const = 0;
+	virtual bool				hasNext() const = 0;
 
-	virtual std::string		previous() = 0;
-	virtual std::string		next() = 0;
+	virtual std::string			previous() = 0;
+	virtual std::string			next() = 0;
 };
 
 /**
@@ -33,14 +35,22 @@ public:
 	DirectoryNavigation() = delete;
 	DirectoryNavigation(const std::string &starting_path);
 
-	bool					hasPrevious() const override;
-	bool					hasNext() const override;
+	bool						hasPrevious() const override;
+	bool						hasNext() const override;
 
-	std::string				previous() override;
-	std::string				next() override;
+	std::string					previous() override;
+	std::string					next() override;
 
 private:
-	std::string				mCurrentPath;
+	void						step(int32_t delta);
+	void						cacheFolder(const ci::fs::path&);
+	size_t						indexFor(const std::string&) const;
+
+	ci::fs::path				mParent;
+	std::time_t					mParentModifiedTime = 0;
+	// Alphabetized list of all GIF files in parent.
+	std::vector<ci::fs::path>	mList;
+	size_t						mCurrentIndex = 0;
 };
 
 /**
@@ -52,11 +62,14 @@ public:
 	FileListNavigation() = delete;
 	FileListNavigation(const std::vector<std::string>&);
 
-	bool					hasPrevious() const override;
-	bool					hasNext() const override;
+	bool						hasPrevious() const override;
+	bool						hasNext() const override;
 
-	std::string				previous() override;
-	std::string				next() override;
+	std::string					previous() override;
+	std::string					next() override;
+
+private:
+	std::vector<std::string>	mList;
 };
 
 } // namespace cs

@@ -25,6 +25,15 @@ FileNavigationView::FileNavigationView(kt::Cns &cns)
 
 	setSize(floorf(mNext.getPosition().x + mNext.getSize().x), floorf(mPrevious.getSize().y));
 
+	mPrevious.setClickFn([this]() {
+		if (mNavigation) {
+			auto		previous = mNavigation->previous();
+			if (!previous.empty()) {
+				cs::SetMediaPathMsg(previous).send(mCns);
+			}
+		}
+	});
+
 	mNext.setClickFn([this]() {
 		if (mNavigation) {
 			auto		next = mNavigation->next();
