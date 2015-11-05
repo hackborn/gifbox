@@ -28,7 +28,8 @@ App::App()
 		, mHudView(mRoot.addChildOrThrow<kt::view::View>(new kt::view::View(mCns)))
 		, mMediaView(mHudView.addChildOrThrow<MediaView>(new MediaView(mCns)))
 		, mGifView(mMediaView.setMediaViewOrThrow<GifView>(new GifView(mCns)))
-		, mFileNavigationView(mHudView.addChildOrThrow<FileNavigationView>(new FileNavigationView(mCns))) {
+		, mFileNavigationView(mHudView.addChildOrThrow<FileNavigationView>(new FileNavigationView(mCns)))
+		, mStatusView(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns))) {
 	mMsgClient.add<SetMediaPathMsg>([this](const SetMediaPathMsg &m) {onSetMediaPath(m);});
 }
 
@@ -51,21 +52,11 @@ void App::prepareSettings(Settings* s) {
 
 void App::setup() {
 	base::setup();
-	// Printing during construction creates an error state, preventing further output,
-	// so clear that out, in case anyone did.
-	std::cout.clear();
 
-	// Build the views
-	const glm::ivec2	iwin_size(getWindowWidth(), getWindowHeight());
-	const glm::vec2		win_size(static_cast<float>(iwin_size.x), static_cast<float>(iwin_size.y));
-	mHudView.setSize(win_size);
-	mMediaView.setSize(win_size);
+	// Layout the views
 	mFileNavigationView.setCenter(0.0f, 1.0f);
-	mFileNavigationView.setPosition(10.0f, floorf(win_size.y-10.0f));
-
-	StatusView&			status(mHudView.addChildOrThrow<StatusView>(new StatusView(mCns)));
-	status.setCenter(1.0f, 1.0f);
-	status.setPosition(floorf(win_size.x-10.0f), floorf(win_size.y-10.0f));
+	mStatusView.setCenter(1.0f, 1.0f);
+	layout();
 
 	mParams = ci::params::InterfaceGl::create("Params", glm::ivec2(220, 120));
 	mParams->addParam("Frame",	&mFrame, "", true);
@@ -84,12 +75,16 @@ void App::setup() {
 	mThreadInput.push(input);
 }
 
+void App::resize() {
+	base::resize();
+	layout();
+}
+
 void App::keyDown(ci::app::KeyEvent e) {
 	if( e.getChar() == 'f' ) {
 		// Toggle full screen when the user presses the 'f' key.
 		setFullScreen( ! isFullScreen() );
-	}
-	else if( e.getCode() == ci::app::KeyEvent::KEY_ESCAPE ) {
+	} else if( e.getCode() == ci::app::KeyEvent::KEY_ESCAPE ) {
 		// Exit full screen, or quit the application, when the user presses the ESC key.
 		if( isFullScreen() )
 			setFullScreen( false );
@@ -146,6 +141,15 @@ void App::update() {
 void App::draw() {
 	base::draw();
 	mParams->draw();
+}
+
+void App::layout() {
+	const glm::ivec2	iwin_size(getWindowWidth(), getWindowHeight());
+	const glm::vec2		win_size(static_cast<float>(iwin_size.x), static_cast<float>(iwin_size.y));
+	mHudView.setSize(win_size);
+	mMediaView.setSize(win_size);
+	mFileNavigationView.setPosition(10.0f, floorf(win_size.y-10.0f));
+	mStatusView.setPosition(floorf(win_size.x-10.0f), floorf(win_size.y-10.0f));
 }
 
 void App::onSetMediaPath(const SetMediaPathMsg &m) {

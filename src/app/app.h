@@ -17,6 +17,7 @@
 #include "view/media_view.h"
 
 namespace cs {
+class StatusView;
 
 /**
  * @class cs::App
@@ -28,6 +29,7 @@ public:
 
 	static void					prepareSettings(Settings*);
 	void						setup() override;
+	void						resize() override;
 
 	void						keyDown(ci::app::KeyEvent) override;
 	void						fileDrop(ci::app::FileDropEvent) override;
@@ -55,6 +57,7 @@ private:
 		bool					mReplaceNavigation = false;
 	};
 
+	void						layout();
 	void						onSetMediaPath(const SetMediaPathMsg&);
 
 	std::shared_ptr<Input>		makeInput(const ci::app::FileDropEvent&) const;
@@ -71,7 +74,8 @@ private:
 	kt::view::View&				mHudView;
 	cs::MediaView&				mMediaView;
 	cs::GifView&				mGifView;
-	class FileNavigationView&	mFileNavigationView;
+	FileNavigationView&			mFileNavigationView;
+	StatusView&					mStatusView;
 
 	// Params
 	ci::params::InterfaceGlRef	mParams;

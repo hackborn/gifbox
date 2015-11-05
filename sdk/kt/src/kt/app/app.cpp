@@ -18,6 +18,7 @@ App::App()
 	// UpdateService should be the first thing created, since so many
 	// other things rely on it.
 	mCns.getService<kt::UpdateService>([this]()->kt::UpdateService*{return new kt::UpdateService(mUpdateList);});
+	mCns.getService<kt::FontService>([]()->kt::FontService*{return new kt::FontService();});
 
 	// Start the settings watcher if that's enabled.
 	// Otherwise, it still needs to be created, so it exists for clients,
@@ -78,8 +79,9 @@ void App::prepareKtSettings(Settings*) {
 }
 
 void App::setup() {
-	// System services
-	mCns.getService<kt::FontService>([]()->kt::FontService*{return new kt::FontService();});
+	// Printing during construction creates an error state, preventing further output,
+	// so clear that out, in case anyone did.
+	std::cout.clear();
 
 	const glm::vec2			window_size(static_cast<float>(getWindowWidth()), static_cast<float>(getWindowHeight()));
 	const ci::Area			area(getWindowBounds());
@@ -104,6 +106,19 @@ void App::setup() {
 void App::cleanup() {
 	for (auto& s : mCns.mServices) {
 		if (s.second) s.second->shutdown();
+	}
+}
+
+void App::resize() {
+	const glm::vec2			window_size(static_cast<float>(getWindowWidth()), static_cast<float>(getWindowHeight()));
+	const ci::Area			area(getWindowBounds());
+	for (auto& r : mRoots) {
+		if (!r) continue;
+		r->setViewport(area);
+		// Default orthos to the full screen
+		// XXX Should be a way to avoid this in case a subclass has done their own setup.
+		kt::view::OrthoRoot*	ortho = dynamic_cast<kt::view::OrthoRoot*>(r.get());
+		if (ortho) ortho->setCameraOrtho(0.0f, window_size.x, window_size.y, 0.0f, -1.0f, 1.0f);
 	}
 }
 

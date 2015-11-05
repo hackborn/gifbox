@@ -26,6 +26,7 @@ public:
 	static void				prepareKtSettings(Settings*);
 	void					setup() override;
 	void					cleanup() override;
+	void					resize() override;
 
 	void					mouseDown(ci::app::MouseEvent) override;
 	// Don't really like this but drag is called when a button is down, otherwise move is called
